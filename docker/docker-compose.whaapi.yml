@@ -1,0 +1,36 @@
+services:
+  whaapi:
+    build:
+      context: ./whaapi
+    container_name: whaapi
+    restart: unless-stopped
+    ports:
+      - "3005:8080"
+      - "3006:8443"
+    env_file:
+      - .env.whaapi
+    volumes:
+      - whaapi_instances:/app/instances
+      - whaapi_store:/app/store
+    networks:
+      - whaapi-net
+
+  # ── Opcional: RabbitMQ para filas de campanha ──
+  whaapi-rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: whaapi-rabbitmq
+    restart: unless-stopped
+    profiles: ["rabbitmq"]
+    ports:
+      - "5672:5672"
+      - "15672:15672"    # painel web em http://localhost:15672
+    networks:
+      - whaapi-net
+
+volumes:
+  whaapi_instances:
+  whaapi_store:
+
+networks:
+  whaapi-net:
+    driver: bridge
